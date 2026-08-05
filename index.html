@@ -420,27 +420,31 @@
               <p><i class="bi bi-envelope-at-fill"></i> prof_rogerio_mariano@hotmail.com</p>
               <p><i class="bi bi-telephone-fill"></i> +55 11 94121-7365</p>
               <p><i class="bi bi-linkedin"></i> linkedin.com/in/rogermariano</p>
-              <p><i class="bi bi-globe2"></i> rogermariano.wordpress.com</p>
+              <p><i class="bi bi-globe2"></i> <a href="https://rogermariano.github.io/portfolio-rogerio" target="_blank" rel="noopener noreferrer">Website portfolio</a></p>
               <p class="mb-0"><i class="bi bi-geo-alt-fill"></i> São Paulo, SP - Brasil</p>
             </div>
           </div>
           <div class="col-lg-7">
-            <form class="contact-form h-100">
+            <form class="contact-form h-100" action="https://api.web3forms.com/submit" method="POST">
+              <input type="hidden" name="access_key" value="859e1bae-861b-45d1-9916-edd8323f91e8" />
+              <input type="hidden" name="subject" value="Novo contato pelo portfólio" />
+              <input type="checkbox" name="botcheck" class="d-none" style="display: none" tabindex="-1" autocomplete="off" />
               <div class="row g-3">
                 <div class="col-md-6">
                   <label for="nome" class="form-label">Nome</label>
-                  <input type="text" id="nome" class="form-control" placeholder="Seu nome" />
+                  <input type="text" id="nome" name="name" class="form-control" placeholder="Seu nome" required />
                 </div>
                 <div class="col-md-6">
                   <label for="email" class="form-label">Email</label>
-                  <input type="email" id="email" class="form-control" placeholder="seu@email.com" />
+                  <input type="email" id="email" name="email" class="form-control" placeholder="seu@email.com" required />
                 </div>
                 <div class="col-12">
                   <label for="mensagem" class="form-label">Mensagem</label>
-                  <textarea id="mensagem" class="form-control" rows="5" placeholder="Conte um pouco sobre seu projeto..."></textarea>
+                  <textarea id="mensagem" name="message" class="form-control" rows="5" placeholder="Conte um pouco sobre seu projeto..." required></textarea>
                 </div>
                 <div class="col-12">
-                  <button type="button" class="btn btn-primary px-4">Enviar</button>
+                  <button type="submit" class="btn btn-primary px-4">Enviar</button>
+                  <p class="form-feedback mt-2 mb-0 small"></p>
                 </div>
               </div>
             </form>
@@ -478,6 +482,40 @@
     });
 
     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) => new bootstrap.Tooltip(el));
+
+    // Envia o formulário de contato via Web3Forms (sem backend próprio) e mostra o resultado sem sair da página.
+    const contactForm = document.querySelector(".contact-form");
+    if (contactForm) {
+      contactForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const feedback = contactForm.querySelector(".form-feedback");
+        const submitBtn = contactForm.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        feedback.className = "form-feedback mt-2 mb-0 small text-secondary";
+        feedback.textContent = "Enviando...";
+
+        try {
+          const response = await fetch(contactForm.action, {
+            method: "POST",
+            body: new FormData(contactForm),
+            headers: { Accept: "application/json" },
+          });
+          const result = await response.json();
+          if (response.ok && result.success) {
+            feedback.className = "form-feedback mt-2 mb-0 small text-success";
+            feedback.textContent = "Mensagem enviada com sucesso! Retornarei em breve.";
+            contactForm.reset();
+          } else {
+            throw new Error(result.message || "Falha no envio.");
+          }
+        } catch (err) {
+          feedback.className = "form-feedback mt-2 mb-0 small text-danger";
+          feedback.textContent = "Não foi possível enviar agora. Tente novamente ou use o WhatsApp/e-mail.";
+        } finally {
+          submitBtn.disabled = false;
+        }
+      });
+    }
   </script>
 </body>
 </html>
